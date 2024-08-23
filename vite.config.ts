@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
-      strategies: 'injectManifest',
+      strategies: 'generateSW',
       registerType: 'autoUpdate',
       includeAssets: [
         'favicon.svg',
@@ -50,6 +50,7 @@ export default defineConfig({
       },
     }),
   ],
+
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
