@@ -9,8 +9,6 @@ export default defineConfig({
     vue(),
     VitePWA({
       strategies: 'injectManifest',
-      srcDir: 'src',
-      filename: 'sw.js',
       registerType: 'autoUpdate',
       includeAssets: [
         'favicon.svg',
