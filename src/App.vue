@@ -1,6 +1,43 @@
+<template>
+  <div class="container">
+    <div class="content" ref="contentToCapture">
+      <h1 class="title">לוח משמרות שבועי</h1>
+      <div class="date-range">
+        <p>{{ dateRange }}</p>
+      </div>
+      <div class="remarks">
+        <p>* משמרת אחה"צ: 16:00-23:00</p>
+        <p>* משמרת לילה: 23:00-03:30</p>
+        <p>
+          * מי שעושה משמרות לילה מחויב לבדוק את כל המיילים במידה ויש משהו דחוף
+          בבקשה לטפל בלקוח.
+        </p>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th v-for="header in headers" :key="header">{{ header }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, index) in rows" :key="index">
+              <td>{{ row.day }}</td>
+              <td><input v-model="row.evening" /></td>
+              <td><input v-model="row.night" /></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <button @click="captureScreenshot" class="screenshot-btn">צלם מסך</button>
+  </div>
+</template>
+
 <script setup>
 import { ref, computed } from 'vue';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 
 const headers = ['יום', 'ערב', 'לילה'];
 const contentToCapture = ref(null);
@@ -45,51 +82,27 @@ for (let i = 0; i < 5; i++) {
 
 const captureScreenshot = () => {
   if (contentToCapture.value) {
-    html2canvas(contentToCapture.value).then((canvas) => {
-      const link = document.createElement('a');
-      link.download = 'shift-schedule-screenshot.png';
-      link.href = canvas.toDataURL();
-      link.click();
-    });
+    toPng(contentToCapture.value, {
+      quality: 1.0, // Full quality
+      backgroundColor: '#ffffff', // Set white background
+      pixelRatio: 7, // For high-resolution screenshots
+      style: {
+        'font-family': 'Arial, sans-serif', // Ensure consistent font rendering
+        color: '#000', // Default text color to avoid transparency issues
+      },
+    })
+      .then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = 'shift-schedule-screenshot.png';
+        link.href = dataUrl;
+        link.click();
+      })
+      .catch((error) => {
+        console.error('Error capturing screenshot:', error);
+      });
   }
 };
 </script>
-<template>
-  <div class="container">
-    <div class="content" ref="contentToCapture">
-      <h1 class="title">לוח משמרות שבועי</h1>
-      <div class="date-range">
-        <p>{{ dateRange }}</p>
-      </div>
-      <div class="remarks">
-        <p>* משמרת אחה"צ: 16:00-23:00</p>
-        <p>* משמרת לילה: 23:00-03:30</p>
-        <p>
-          * מי שעושה משמרות לילה מחויב לבדוק את כל המיילים במידה ויש משהו דחוף
-          בבקשה לטפל בלקוח.
-        </p>
-      </div>
-
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th v-for="header in headers" :key="header">{{ header }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(row, index) in rows" :key="index">
-              <td>{{ row.day }}</td>
-              <td><input v-model="row.evening" /></td>
-              <td><input v-model="row.night" /></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <button @click="captureScreenshot" class="screenshot-btn">צלם מסך</button>
-  </div>
-</template>
 
 <style scoped>
 .container {
@@ -108,6 +121,7 @@ const captureScreenshot = () => {
 
 .content {
   width: 100%;
+  background-color: #ffffff; /* Ensure background color is set */
 }
 
 .title {
@@ -161,6 +175,10 @@ input {
   border: 1px solid #ced4da;
   border-radius: 4px;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  height: 30px; /* Explicit height setting */
+  line-height: 1.5;
+  box-sizing: border-box;
+  font-size: 12px;
 }
 
 input:focus {
